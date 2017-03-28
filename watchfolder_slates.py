@@ -1,20 +1,25 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from PIL import Image, ImageDraw, ImageFont
+import time
 import os
 import subprocess
 import sys
 import openpyxl
 import datetime
+import re
 
 
 #/opt/local/bin/ffmpeg -loop 1 -framerate 23.976023976023978 -i /Users/e10/Desktop/watch/04_scripts/YVZW6108H\ Better\ Together\ 24\ GB\ Offer\ Generic\ HD\ 30_SLATE.png -i  /Users/e10/Desktop/watch/04_scripts/Countdown_2015_w_alpha.mov -filter_complex overlay -vcodec prores_ks -profile:v 3 -t 00:00:07.01 /Users/e10/Desktop/watch/03_done/test.mov
 ffmpeg_path = '/opt/local/bin/ffmpeg'
-excel_directory = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/00_Slatenator'
-source_directory = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/01_drop_here'
-compressed_directory = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/02_compressed'
-done_directory = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/03_done'
-countdown = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/04_scripts/Countdown_2015_w_alpha.mov'
-slate_starter = '/Volumes/FIN_SHARE/0-FINI_JOBS/0000_ENGINEERING/WF_Slates/04_scripts/slate_starter.tif'
+slate_compression_root_path = '/Volumes/FIN_SHARE/5-COMPRESSION/WF_Slates'
+excel_directory = '{0}/00_drop_here'.format(slate_compression_root_path)
+source_directory = '{0}/01_working_pngs'.format(slate_compression_root_path)
+compressed_directory = '{0}/02_compressed'.format(slate_compression_root_path)
+done_directory = '{0}/03_done'.format(slate_compression_root_path)
+countdown = '{0}/04_scripts/Countdown_2015_w_alpha.mov'.format(slate_compression_root_path)
+slate_starter = '{0}/04_scripts/slate_starter.tif'.format(slate_compression_root_path)
 source_extension = '.png'
 destination_extension = '.mov'
 excel_extension = '.xlsx'
@@ -23,7 +28,7 @@ rate = '23.976023976023978'
 
 #master font to use, plus colors
 font = '/System/Library/Fonts/HelveticaNeueDeskInterface.ttc'
-gray = (200,200,200)
+gray = (130,130,130)
 red = (200,77,82)
 left_margin = 385
 #set size and Bold, italic, etc
@@ -46,14 +51,23 @@ def make_excel_list():
     os.chdir(excel_directory)
     files = os.listdir(os.getcwd())
     for i in files:
-        if i.endswith(excel_extension):
-            excel_list.append(i)
+        if not i.startswith('.'):
+            if i.endswith(excel_extension):
+                excel_list.append(i)
+
+def check_if_excel_list_has_items():
+    if len(excel_list) > 0:
+        return True
+    else:
+        return False
 
 def open_excel():
     for i in excel_list:
+        print i
         wb = openpyxl.load_workbook(i,read_only = True, data_only = True)
         ws = wb['Sheet1']
-        return ws
+        generate_slate_pngs(ws)
+        #return ws
 
 def generate_slate_pngs(ws):
     for row in ws.rows:
@@ -76,11 +90,16 @@ def generate_slate_pngs(ws):
                     slate_contents.append(new_date)
                 #turn empty cells into blank strings
                 elif cell.value is None:
-                    new_value = ''
+                    new_value = ' '
                     slate_contents.append(new_value)
                 #write cell to list
                 else:
+                    #new_unicode_value = cell.value# maybe kill this
+                    #new_unicode_value = new_unicode_value.encode('UTF-8')#maybe kill this
                     slate_contents.append(cell.value)
+                    #slate_contents.append(new_unicode_value)
+            if len(slate_contents) == 8:
+                slate_contents.append(' ')
             #Agency
             d.text((left_margin,200), slate_contents[0], font=fnt1, fill=gray)
             #Client
@@ -113,7 +132,9 @@ def generate_slate_pngs(ws):
             #legal / copyright
             d.text((left_margin,898), slate_contents[8], font=fnt5, fill=gray)
             #name file after ISCI
-            outname = '{}{}'.format(slate_contents[2], '.png')
+            pre_outname = '{0}_{1}_SLATE{2}'.format(slate_contents[2], slate_contents[3],'.png')
+            regex = re.compile('[^a-zA-Z0-9 _.\-]')
+            outname = regex.sub('', pre_outname)
             outname_with_path = os.path.join(source_directory, outname)
             #Save file
             txt.save(outname_with_path)
@@ -138,23 +159,34 @@ def make_png_slate_list():
 
 def encode():
     for i in png_slate_list:
-        print i
         ff_source = os.path.join(source_directory, i)
-        done_path = os.path.join(done_directory, i)
+        png_done_path = os.path.join(compressed_directory, i)
         out_name_base = ''.join(i.split('.')[:-1])
         out_name = '{0}{1}'.format(out_name_base, destination_extension)
         ff_destination = os.path.join(compressed_directory, out_name)
+        if os.path.isfile(ff_destination):
+            os.remove(ff_destination)
         if i.endswith(source_extension):
             subprocess.call([ffmpeg_path, '-loop', '1', '-framerate', rate, '-i',
                             ff_source, '-i', countdown, '-filter_complex',
                             'overlay', '-vcodec', 'prores_ks', '-profile:v', '3',
-                            '-t', '00:00:07.01', ff_destination])
-            os.rename(ff_source, done_path)
+                            '-vendor', 'ap10', '-t', '00:00:07.01', ff_destination])
+            os.rename(ff_source, png_done_path)
         else:
-            os.rename(ff_source, done_path)
+            os.rename(ff_source, png_done_path)
 
-make_excel_list()
-generate_slate_pngs(open_excel())
-move_excel_doc_to_done()
-make_png_slate_list()
-encode()
+
+while True:
+    excel_list = []
+    png_slate_list = []
+    make_excel_list()
+    if check_if_excel_list_has_items() == True:
+        print "Excel docs found"
+        open_excel()
+        move_excel_doc_to_done()
+        make_png_slate_list()
+        encode()
+    else:
+        print "No Excel docs found"
+        pass
+    time.sleep(30)
