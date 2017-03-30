@@ -13,10 +13,10 @@ import re
 
 #/opt/local/bin/ffmpeg -loop 1 -framerate 23.976023976023978 -i /Users/e10/Desktop/watch/04_scripts/YVZW6108H\ Better\ Together\ 24\ GB\ Offer\ Generic\ HD\ 30_SLATE.png -i  /Users/e10/Desktop/watch/04_scripts/Countdown_2015_w_alpha.mov -filter_complex overlay -vcodec prores_ks -profile:v 3 -t 00:00:07.01 /Users/e10/Desktop/watch/03_done/test.mov
 ffmpeg_path = '/opt/local/bin/ffmpeg'
-slate_compression_root_path = '/Volumes/FIN_SHARE/5-COMPRESSION/WF_Slates'
+slate_compression_root_path = '/Volumes/genesis/00-FINI_JOBS/0000_Engineering/WF_Slates'
 excel_directory = '{0}/00_drop_here'.format(slate_compression_root_path)
 source_directory = '{0}/01_working_pngs'.format(slate_compression_root_path)
-compressed_directory = '{0}/02_compressed'.format(slate_compression_root_path)
+compressed_directory = '/Volumes/genesis/00-FINI_JOBS/0000_NewSlates'
 done_directory = '{0}/03_done'.format(slate_compression_root_path)
 countdown = '{0}/04_scripts/Countdown_2015_w_alpha.mov'.format(slate_compression_root_path)
 slate_starter = '{0}/04_scripts/slate_starter.tif'.format(slate_compression_root_path)
@@ -98,7 +98,9 @@ def generate_slate_pngs(ws):
                     #new_unicode_value = new_unicode_value.encode('UTF-8')#maybe kill this
                     slate_contents.append(cell.value)
                     #slate_contents.append(new_unicode_value)
-            if len(slate_contents) == 8:
+            #if len(slate_contents) == 8:
+            #    slate_contents.append(' ')
+            while len(slate_contents) < 9:
                 slate_contents.append(' ')
             #Agency
             d.text((left_margin,200), slate_contents[0], font=fnt1, fill=gray)
@@ -160,7 +162,7 @@ def make_png_slate_list():
 def encode():
     for i in png_slate_list:
         ff_source = os.path.join(source_directory, i)
-        png_done_path = os.path.join(compressed_directory, i)
+        png_done_path = os.path.join(done_directory, i)
         out_name_base = ''.join(i.split('.')[:-1])
         out_name = '{0}{1}'.format(out_name_base, destination_extension)
         ff_destination = os.path.join(compressed_directory, out_name)
