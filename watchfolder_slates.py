@@ -13,13 +13,16 @@ import re
 
 #/opt/local/bin/ffmpeg -loop 1 -framerate 23.976023976023978 -i /Users/e10/Desktop/watch/04_scripts/YVZW6108H\ Better\ Together\ 24\ GB\ Offer\ Generic\ HD\ 30_SLATE.png -i  /Users/e10/Desktop/watch/04_scripts/Countdown_2015_w_alpha.mov -filter_complex overlay -vcodec prores_ks -profile:v 3 -t 00:00:07.01 /Users/e10/Desktop/watch/03_done/test.mov
 ffmpeg_path = '/opt/local/bin/ffmpeg'
-slate_compression_root_path = '/Volumes/genesis/00-FINI_JOBS/0000_Engineering/WF_Slates'
-excel_directory = '{0}/00_drop_here'.format(slate_compression_root_path)
-source_directory = '{0}/01_working_pngs'.format(slate_compression_root_path)
-compressed_directory = '/Volumes/genesis/00-FINI_JOBS/0000_NewSlates'
-done_directory = '{0}/03_done'.format(slate_compression_root_path)
+slate_compression_root_path = '/Volumes/genesis/00-FINI_JOBS/0000_Slates'
+excel_directory = '{0}/00_drop_xlsx_here'.format(slate_compression_root_path)
+png_working_directory = '{0}/04_scripts/z_working_pngs'.format(slate_compression_root_path)
+mov_working_directory = '{0}/04_scripts/z_working_movs'.format(slate_compression_root_path)
+compressed_directory = '{0}/01_finished_slates'.format(slate_compression_root_path)
+done_png_directory = '{0}/02_finished_pngs'.format(slate_compression_root_path)
+done_xlsx_directory = '{0}/03_finished_xlsx'.format(slate_compression_root_path)
 countdown = '{0}/04_scripts/Countdown_2015_w_alpha.mov'.format(slate_compression_root_path)
 slate_starter = '{0}/04_scripts/slate_starter.tif'.format(slate_compression_root_path)
+status_file = '{0}/01_finished_slates/compression_in_progress.txt'.format(slate_compression_root_path)
 source_extension = '.png'
 destination_extension = '.mov'
 excel_extension = '.xlsx'
@@ -113,45 +116,45 @@ def generate_slate_pngs(ws):
             w2,h2 = fnt3b.getsize(slate_contents[3])
             w3,h3 = fnt3c.getsize(slate_contents[3])
             w4,h4 = fnt3d.getsize(slate_contents[3])
-            if w < 1150:
+            if w < 1150: #was 1150
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3, fill=gray)
-            elif w2 < 1150:
+            elif w2 < 1150: #was 1150
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3b, fill=gray)
-            elif w3 < 1150:
+            elif w3 < 1150:  #was 1150
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3c, fill=gray)
-            elif w4 < 1150:
+            elif w4 < 1150:  #was 1150
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3d, fill=gray)
             else:
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3e, fill=gray)
             # TRT
-            d.text((left_margin,540), slate_contents[4], font=fnt4, fill=gray)
+            d.text((left_margin,600), slate_contents[4], font=fnt4, fill=gray)
             #audio
             d.text((left_margin,660), slate_contents[5], font=fnt4, fill=gray)
             #date
-            d.text((left_margin,727), slate_contents[6], font=fnt4, fill=gray)
+            d.text((left_margin,720), slate_contents[6], font=fnt4, fill=gray)
             #comments (aka NFA)
             d.text((left_margin,820), slate_contents[7], font=fnt4, fill=red)
             #legal / copyright
             d.text((left_margin,898), slate_contents[8], font=fnt5, fill=gray)
             #name file after ISCI
-            pre_outname = '{0}_{1}_SLATE{2}'.format(slate_contents[2], slate_contents[3],'.png')
+            png_pre_outname = '{0}_{1}_SLATE{2}'.format(slate_contents[2], slate_contents[3],'.png')
             regex = re.compile('[^a-zA-Z0-9 _.\-]')
-            outname = regex.sub('', pre_outname)
-            outname_with_path = os.path.join(source_directory, outname)
+            png_outname = regex.sub('', png_pre_outname)
+            png_outname_with_path = os.path.join(png_working_directory, png_outname)
             #Save file
-            txt.save(outname_with_path)
+            txt.save(png_outname_with_path)
             txt.close()
 
 def move_excel_doc_to_done():
     for i in excel_list:
         excel_source = os.path.join(excel_directory, i)
-        excel_done = os.path.join(done_directory, i)
+        excel_done = os.path.join(done_xlsx_directory, i)
         os.rename(excel_source, excel_done)
 
 
 
 def make_png_slate_list():
-    os.chdir(source_directory)
+    os.chdir(png_working_directory)
     files = os.listdir(os.getcwd())
     for i in files:
         png_slate_list.append(i)
@@ -160,22 +163,33 @@ def make_png_slate_list():
 
 
 def encode():
+    temp_status_file = open(status_file, 'a')
+    temp_status_file.write('Compressing:')
+    temp_status_file.close()
     for i in png_slate_list:
-        ff_source = os.path.join(source_directory, i)
-        png_done_path = os.path.join(done_directory, i)
+        ff_source = os.path.join(png_working_directory, i)
+        png_done_path = os.path.join(done_png_directory, i)
         out_name_base = ''.join(i.split('.')[:-1])
         out_name = '{0}{1}'.format(out_name_base, destination_extension)
-        ff_destination = os.path.join(compressed_directory, out_name)
-        if os.path.isfile(ff_destination):
-            os.remove(ff_destination)
+        mov_working_path = os.path.join(mov_working_directory, out_name)
+        mov_done_path = os.path.join(compressed_directory, out_name)
+        if os.path.isfile(mov_working_path):
+            os.remove(mov_working_path)
         if i.endswith(source_extension):
+            temp_status_file = open(status_file, 'a')
+            temp_status_file.write(mov_working_path)
+            temp_status_file.close()
             subprocess.call([ffmpeg_path, '-loop', '1', '-framerate', rate, '-i',
                             ff_source, '-i', countdown, '-filter_complex',
                             'overlay', '-vcodec', 'prores_ks', '-profile:v', '3',
-                            '-vendor', 'ap10', '-t', '00:00:07.01', ff_destination])
+                            '-vendor', 'ap10', '-t', '00:00:07.01', mov_working_path])
             os.rename(ff_source, png_done_path)
+            os.rename(mov_working_path, mov_done_path)
         else:
             os.rename(ff_source, png_done_path)
+    os.remove(status_file)
+
+
 
 
 while True:
@@ -192,3 +206,4 @@ while True:
         print "No Excel docs found"
         pass
     time.sleep(30)
+  
