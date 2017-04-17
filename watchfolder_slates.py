@@ -13,7 +13,7 @@ import re
 
 #/opt/local/bin/ffmpeg -loop 1 -framerate 23.976023976023978 -i /Users/e10/Desktop/watch/04_scripts/YVZW6108H\ Better\ Together\ 24\ GB\ Offer\ Generic\ HD\ 30_SLATE.png -i  /Users/e10/Desktop/watch/04_scripts/Countdown_2015_w_alpha.mov -filter_complex overlay -vcodec prores_ks -profile:v 3 -t 00:00:07.01 /Users/e10/Desktop/watch/03_done/test.mov
 ffmpeg_path = '/opt/local/bin/ffmpeg'
-slate_compression_root_path = '/Volumes/genesis/00-FINI_JOBS/0000_Slates'
+slate_compression_root_path = '/Users/e10/Desktop/0000_Slates'
 excel_directory = '{0}/00_drop_xlsx_here'.format(slate_compression_root_path)
 png_working_directory = '{0}/04_scripts/z_working_pngs'.format(slate_compression_root_path)
 mov_working_directory = '{0}/04_scripts/z_working_movs'.format(slate_compression_root_path)
@@ -33,11 +33,11 @@ rate = '23.976023976023978'
 font = '/System/Library/Fonts/HelveticaNeueDeskInterface.ttc'
 gray = (130,130,130)
 red = (200,77,82)
-left_margin = 385
+left_margin = 380
 #set size and Bold, italic, etc
-fnt1 = ImageFont.truetype(font, 55, 0)
-fnt2 = ImageFont.truetype(font, 55, 1)
-fnt3 = ImageFont.truetype(font, 55, 2)
+fnt1 = ImageFont.truetype(font, 50, 0) #was 55
+fnt2 = ImageFont.truetype(font, 50, 1) #was 55
+fnt3 = ImageFont.truetype(font, 50, 2) #was 55
 fnt3b = ImageFont.truetype(font, 45, 2)
 fnt3c = ImageFont.truetype(font, 35, 2)
 fnt3d = ImageFont.truetype(font, 25, 2)
@@ -106,30 +106,30 @@ def generate_slate_pngs(ws):
             while len(slate_contents) < 9:
                 slate_contents.append(' ')
             #Agency
-            d.text((left_margin,200), slate_contents[0], font=fnt1, fill=gray)
+            d.text((left_margin,195), slate_contents[0], font=fnt1, fill=gray)
             #Client
-            d.text((left_margin,270), slate_contents[1], font=fnt1, fill=gray)
+            d.text((left_margin,260), slate_contents[1], font=fnt1, fill=gray)
             #ISCI
-            d.text((left_margin,360), slate_contents[2], font=fnt2, fill=red)
+            d.text((left_margin,400), slate_contents[2], font=fnt2, fill=red)
             #Spot Title / check to see if title is too long, scale down
             w,h = fnt3.getsize(slate_contents[3])
             w2,h2 = fnt3b.getsize(slate_contents[3])
             w3,h3 = fnt3c.getsize(slate_contents[3])
             w4,h4 = fnt3d.getsize(slate_contents[3])
-            if w < 1150: #was 1150
+            if w < 1150:
                 d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3, fill=gray)
-            elif w2 < 1150: #was 1150
-                d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3b, fill=gray)
-            elif w3 < 1150:  #was 1150
-                d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3c, fill=gray)
-            elif w4 < 1150:  #was 1150
-                d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3d, fill=gray)
+            elif w2 < 1150:
+                d.text((left_margin,468), '{} {}'.format(slate_contents[3], ' '), font=fnt3b, fill=gray)
+            elif w3 < 1150:
+                d.text((left_margin,476), '{} {}'.format(slate_contents[3], ' '), font=fnt3c, fill=gray)
+            elif w4 < 1150:
+                d.text((left_margin,484), '{} {}'.format(slate_contents[3], ' '), font=fnt3d, fill=gray)
             else:
-                d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3e, fill=gray)
+                d.text((left_margin,492), '{} {}'.format(slate_contents[3], ' '), font=fnt3e, fill=gray)
             # TRT
-            d.text((left_margin,600), slate_contents[4], font=fnt4, fill=gray)
+            d.text((left_margin,620), slate_contents[4], font=fnt4, fill=gray)
             #audio
-            d.text((left_margin,660), slate_contents[5], font=fnt4, fill=gray)
+            d.text((left_margin,670), slate_contents[5], font=fnt4, fill=gray)
             #date
             d.text((left_margin,720), slate_contents[6], font=fnt4, fill=gray)
             #comments (aka NFA)
