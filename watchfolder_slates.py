@@ -9,6 +9,7 @@ import sys
 import openpyxl
 import datetime
 import re
+import textwrap
 
 
 #/opt/local/bin/ffmpeg -loop 1 -framerate 23.976023976023978 -i /Users/e10/Desktop/watch/04_scripts/YVZW6108H\ Better\ Together\ 24\ GB\ Offer\ Generic\ HD\ 30_SLATE.png -i  /Users/e10/Desktop/watch/04_scripts/Countdown_2015_w_alpha.mov -filter_complex overlay -vcodec prores_ks -profile:v 3 -t 00:00:07.01 /Users/e10/Desktop/watch/03_done/test.mov
@@ -112,20 +113,17 @@ def generate_slate_pngs(ws):
             #ISCI
             d.text((left_margin,400), slate_contents[2], font=fnt2, fill=red)
             #Spot Title / check to see if title is too long, scale down
-            w,h = fnt3.getsize(slate_contents[3])
-            w2,h2 = fnt3b.getsize(slate_contents[3])
-            w3,h3 = fnt3c.getsize(slate_contents[3])
-            w4,h4 = fnt3d.getsize(slate_contents[3])
-            if w < 1150:
-                d.text((left_margin,460), '{} {}'.format(slate_contents[3], ' '), font=fnt3, fill=gray)
-            elif w2 < 1150:
-                d.text((left_margin,468), '{} {}'.format(slate_contents[3], ' '), font=fnt3b, fill=gray)
-            elif w3 < 1150:
-                d.text((left_margin,476), '{} {}'.format(slate_contents[3], ' '), font=fnt3c, fill=gray)
-            elif w4 < 1150:
-                d.text((left_margin,484), '{} {}'.format(slate_contents[3], ' '), font=fnt3d, fill=gray)
-            else:
-                d.text((left_margin,492), '{} {}'.format(slate_contents[3], ' '), font=fnt3e, fill=gray)
+            wrapped_text = textwrap.wrap(slate_contents[3], 48)
+            print wrapped_text
+            if len(wrapped_text) == 1:
+                d.text((left_margin,460), '{} {}'.format(wrapped_text[0], ' '), font=fnt3, fill=gray)
+            elif len(wrapped_text) == 2:
+                d.text((left_margin,460), '{} {}'.format(wrapped_text[0], ' '), font=fnt3, fill=gray)
+                d.text((left_margin,510), '{} {}'.format(wrapped_text[1], ' '), font=fnt3, fill=gray)
+            elif len(wrapped_text) == 3:
+                d.text((left_margin,460), '{} {}'.format(wrapped_text[0], ' '), font=fnt3, fill=gray)
+                d.text((left_margin,510), '{} {}'.format(wrapped_text[1], ' '), font=fnt3, fill=gray)
+                d.text((left_margin,560), '{} {}'.format(wrapped_text[1], ' '), font=fnt3, fill=gray)
             # TRT
             d.text((left_margin,620), slate_contents[4], font=fnt4, fill=gray)
             #audio
